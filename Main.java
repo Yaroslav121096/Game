@@ -2,125 +2,164 @@ package seminar1;
 
 import seminar1.units.*;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        // ArrayList<BaseHero> heroes = rndClassesArrList();
-        // heroes.forEach(n -> System.out.println(n));
-        // System.out.println("_".repeat(40));
-        // System.out.println("Всего персонажей: " + BaseHero.getCount());
 
-        // if (heroes.get(0) instanceof Shooter) ((Shooter) heroes.get(0)).step();
+//        printHeader("Порядок ходов");
 
-        // heroes.forEach(n -> System.out.println(n.getInfo() + " " + n.name));
+//        printInitiativeList(getSortedIndexList());
 
-        ArrayList<BaseHero> firstTeam = createFirstTeam();
+//        printInitiativeList();
 
-        ArrayList<BaseHero> secondTeam = createSecondTeam();
-
-        System.out.println("Первая команда\n" + "_".repeat(40));
-        firstTeam.forEach(n -> System.out.println(n.getHeroName() + " " + n.getPosition()));
-        System.out.println("Вторая команда\n" + "_".repeat(40));
-        secondTeam.forEach(n -> System.out.println(n.getHeroName() + " " + n.getPosition()));
-
-        System.out.println("Ходы\n" + "_".repeat(40));
-        // firstTeam.forEach(n -> System.out.println(n.getInfo()));
-        firstTeam.forEach(n -> n.step(secondTeam));
-        // secondTeam.forEach(n -> System.out.println(n.getInfo()));
-        secondTeam.forEach(n -> n.step(firstTeam));
-
-        // System.out.println(firstTeam.get(1).findClosestEnemy(secondTeam));
+        startGame();
 
     }
 
-    private static String getName() {
+    static boolean gameEnded() {
+        return BaseHero.getFirstTeam().isEmpty() || BaseHero.getSecondTeam().isEmpty();
+    }
+
+    static void startGame() {
+        System.out.println("Игра начинается");
+        Scanner scanner = new Scanner(System.in);
+        String input = "";
+        int turnsCounter = 0;
+        createTeams();
+        while (!gameEnded() && !Objects.equals(input, "q")) {
+            printHeader("Нажмите enter для продолжения, или введите q для выхода");
+            input = scanner.nextLine();
+            if (Objects.equals(input, "q")) break;
+            turnsCounter++;
+            System.out.println("Ход №" + turnsCounter);
+            showTeams();
+            teamsMakeTurns();
+        }
+        if (gameEnded()) {
+            printHeader("Игра закончена");
+            printWin();
+        }
+    }
+
+    static void printWin() {
+        if (BaseHero.getFirstTeam().isEmpty())
+            printHeader("Все персонажи в первой команде мертвы\nПобедила вторая команда");
+        else
+            printHeader("Все персонажи во второй команде мертвы\nПобедила первая команда");
+    }
+
+    static void teamsMakeTurns() {
+//        Scanner scanner = new Scanner(System.in);
+        int[] orderIndexes = getSortedIndexList();
+        ArrayList<BaseHero> allHeroesList = BaseHero.getAllHeroesList();
+        printHeader("Ходы");
+        for (int id : orderIndexes) {
+//            scanner.nextLine();
+            allHeroesList.get(id).step();
+        }
+    }
+
+    static void showTeams() {
+        printHeader("Команды");
+        printHeader("Первая команда");
+        for (BaseHero hero : BaseHero.getFirstTeam()) {
+//            if (!Objects.equals(hero.getState(), "Dead"))
+            System.out.println(hero);
+        }
+        printHeader("Вторая команда");
+        for (BaseHero hero : BaseHero.getSecondTeam()) {
+//            if (!Objects.equals(hero.getState(), "Dead"))
+            System.out.println(hero);
+        }
+    }
+
+    static void printInitiativeList(int[] orderIndexes) {
+        ArrayList<BaseHero> allHeroesList = BaseHero.getAllHeroesList();
+        for (int id : orderIndexes) {
+            BaseHero hero = allHeroesList.get(id);
+            System.out.println(hero.getInfo() + " Инициатива: " + hero.getInitiative());
+        }
+    }
+
+    static int[] getSortedIndexList() {
+        ArrayList<BaseHero> allHeroesList = BaseHero.getAllHeroesList();
+        int[] indexes = getIndexesArray(BaseHero.getAllHeroesList());
+        for (int count = 0; count < indexes.length; count++) {
+            boolean sorted = true;
+            for (int i = 0; i < indexes.length - 1; i++) {
+                if (indexes[i] + 1 < indexes.length)
+                    if (allHeroesList.get(indexes[i + 1]).getInitiative() > allHeroesList.get(indexes[i]).getInitiative()) {
+                        int t = indexes[i + 1];
+                        indexes[i + 1] = indexes[i];
+                        indexes[i] = t;
+                        sorted = false;
+                    }
+            }
+            if (sorted) break;
+        }
+        return indexes;
+    }
+
+    static int[] getIndexesArray(ArrayList<BaseHero> AllHeroes) {
+        int[] orderIndexes = new int[AllHeroes.size()];
+        int i = 0;
+        for (BaseHero hero : AllHeroes) {
+            orderIndexes[i++] = hero.getId();
+        }
+        return orderIndexes;
+    }
+
+    public static void printInitiativeList() {
+        PriorityQueue<BaseHero> initiativeList = BaseHero.getInitiativeList();
+        printHeader("Очерёдность ходов");
+        while (!initiativeList.isEmpty()) {
+            System.out.println(initiativeList.poll());
+        }
+    }
+
+    public static void printHeader(String text) {
+        System.out.print("_".repeat(40) + "\n" + text + "\n" + "_".repeat(40) + "\n");
+    }
+
+
+    public static String getName() {
         return Names.values()[new Random().nextInt(Names.values().length)].toString();
     }
 
-    // private static ArrayList<BaseHero> rndClassesArrList(){
-    // ArrayList<BaseHero> heroes = new ArrayList<>();
-    // for (int i = 0; i < 8; i++) {
-    // int random = new Random().nextInt(6);
-    // switch (random){
-    // case 0: heroes.add(new Bowman(getName()));
-    // break;
-    // case 1: heroes.add(new Crossbowman(getName()));
-    // break;
-    // case 2: heroes.add(new Mage(getName()));
-    // break;
-    // case 3: heroes.add(new Monk(getName()));
-    // break;
-    // case 4: heroes.add(new Spearman(getName()));
-    // break;
-    // case 5: heroes.add(new Thief(getName()));
-    // break;
-    // default: heroes.add(new Peasant(getName()));
-    // }
-    // }
-    // return heroes;
-    // }
-
-    public static ArrayList<BaseHero> createFirstTeam() {
-        ArrayList<BaseHero> heroes = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            int random = new Random().nextInt(6);
+    public static void createTeam(boolean firstTeam) {
+        new Peasant(getName(), firstTeam);
+        for (int i = 0; i < 9; i++) {
+            int random = new Random().nextInt(7);
             switch (random) {
                 case 0:
-                    heroes.add(new Bowman(getName(), true));
+                    new Bowman(getName(), firstTeam);
                     break;
                 case 1:
-                    heroes.add(new Crossbowman(getName(), true));
+                    new Crossbowman(getName(), firstTeam);
                     break;
                 case 2:
-                    heroes.add(new Mage(getName(), true));
+                    new Mage(getName(), firstTeam);
                     break;
                 case 3:
-                    heroes.add(new Monk(getName(), true));
+                    new Monk(getName(), firstTeam);
                     break;
                 case 4:
-                    heroes.add(new Spearman(getName(), true));
+                    new Spearman(getName(), firstTeam);
                     break;
                 case 5:
-                    heroes.add(new Thief(getName(), true));
+                    new Rogue(getName(), firstTeam);
                     break;
                 default:
-                    heroes.add(new Peasant(getName(), true));
+                    new Peasant(getName(), firstTeam);
             }
         }
-        return heroes;
     }
 
-    public static ArrayList<BaseHero> createSecondTeam() {
-        ArrayList<BaseHero> heroes = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            int random = new Random().nextInt(6);
-            switch (random) {
-                case 0:
-                    heroes.add(new Bowman(getName(), false));
-                    break;
-                case 1:
-                    heroes.add(new Crossbowman(getName(), false));
-                    break;
-                case 2:
-                    heroes.add(new Mage(getName(), false));
-                    break;
-                case 3:
-                    heroes.add(new Monk(getName(), false));
-                    break;
-                case 4:
-                    heroes.add(new Spearman(getName(), false));
-                    break;
-                case 5:
-                    heroes.add(new Thief(getName(), false));
-                    break;
-                default:
-                    heroes.add(new Peasant(getName(), false));
-            }
-        }
-        return heroes;
+    public static void createTeams() {
+        createTeam(true);
+        createTeam(false);
     }
 
 }
