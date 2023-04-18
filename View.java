@@ -1,6 +1,6 @@
 package seminar1;
 
-import seminar01.units.BaseHero;
+import seminar1.units.BaseHero;
 
 import java.util.Collections;
 

@@ -1,12 +1,12 @@
 package seminar1.teams;
 
-import seminar01.units.*;
+import seminar1.units.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-import static seminar01.Main.getName;
+import static seminar1.Main.getName;
 
 public class Team<T extends BaseHero> implements Iterable<BaseHero> {
     ArrayList<BaseHero> heroes = new ArrayList<>();

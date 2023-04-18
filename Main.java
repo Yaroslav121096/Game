@@ -1,7 +1,7 @@
 package seminar1;
 
-import seminar01.teams.Team;
-import seminar01.units.*;
+import seminar1.teams.Team;
+import seminar1.units.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class Main {
     }
 
     protected void printWin() {
-        if (BaseHero.filterLiveTeam(BaseHero.getHolyTeam()).isEmpty())
+        if (BaseHero.filterVisibleTeam(BaseHero.getHolyTeam()).isEmpty())
             printHeader("Все персонажи в первой команде мертвы\nПобедила вторая команда");
         else
             printHeader("Все персонажи во второй команде мертвы\nПобедила первая команда");
